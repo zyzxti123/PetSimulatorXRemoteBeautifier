@@ -19,16 +19,19 @@ local remoteHashedNamesStorage = debug.getupvalue(_getName, 1)
 for remoteType: number, remoteStorage: {[number]: {[string]: string}} in next, remoteHashedNamesStorage do
     for remoteName: string, remoteHashedName: string in next, remoteStorage do
         remoteReversedNamesHashedStorage[remoteType][remoteHashedName] = remoteName
-        remoteHashedNamesStorage[remoteType][remoteName] = remoteName
+		remoteHashedNamesStorage[remoteType][remoteName] = remoteName
+		remoteHashedNamesStorage[remoteType][remoteHashedName] = nil
     end
 end
 
 local remotesInstanceStorage = debug.getupvalue(_remote, 1)
 for remoteType: number, remoteStorage: {[number]: {[string]: RemoteFunction | RemoteEvent}} in next, remotesInstanceStorage do
     for remoteHashedName: string, remoteInstance: RemoteFunction | RemoteEvent in next, remoteStorage do
-        if remoteReversedNamesHashedStorage[remoteType] and remoteReversedNamesHashedStorage[remoteType][remoteHashedName] then
-            local remoteName = remoteReversedNamesHashedStorage[remoteType][remoteHashedName]
-            remoteInstance.Name = remoteName
+        local remoteName = remoteReversedNamesHashedStorage[remoteType][remoteHashedName]
+        if remoteName then
+			remotesInstanceStorage[remoteType][remoteHashedName].Name = remoteName
+			remotesInstanceStorage[remoteType][remoteName] = remotesInstanceStorage[remoteType][remoteHashedName]
+			remotesInstanceStorage[remoteType][remoteHashedName] = nil
 
             warn(`[Z-Ware]: Dehashed: {remoteHashedName} → {remoteName}`)
         else    
